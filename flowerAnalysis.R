@@ -1,6 +1,8 @@
 library(plyr)
 library(sp)
 library(spdep) # For the spatial weights matrix
+library(ggplot2)
+library(ggthemes)
 
 ##### Data Cleaning #####
 # Primary function: cleanData(file.choose())
@@ -54,6 +56,27 @@ filterData <- function(flowerSpecies, transect, date, flowerData)
   return(makeTransects(flowerType = flowerSpecies, cleanedFlowerData))
 }
 
+plotAllDatesMoransI <- function (species, transect, flowerData)
+{
+  # For a given species name and transect, report the Moran's I
+  # for every date that flowers were found.
+  # Input: species, a string
+  #        transect, a string
+  #        flowerdata, the cleaned data (from cleanData())
+  # Output: A line plot showing the moran's I statistic over time
+  
+  moransIData <- allDatesMoransI(species, transect, flowerData)
+  
+  moransIData$Date <- as.Date(moransIData$Date, format = "%m/%d/%Y")
+  
+  ciPlot <- ggplot(moransIData, 
+                   aes(Date, moransI)) + geom_pointrange(aes(ymin = lowerCI, ymax = upperCI))
+  ciPlot <- ciPlot + labs(title = paste("Moran's I for", species,"in Transect", transect, "with 95% Confidence Intervals"),
+                          x = "Date",
+                          y = "Moran's I")
+  ciPlot <- ciPlot + theme_hc()
+  print(ciPlot)
+}
 
 allDatesMoransI <- function(species, transect, flowerData)
 {
@@ -62,19 +85,33 @@ allDatesMoransI <- function(species, transect, flowerData)
   # Input: species, a string
   #        transect, a string
   #        flowerdata, the cleaned data (from cleanData())
+  # Output: A data frame containing the Date, moransI, variance of moran's I,
+  #         the associated p-value, and its 95% confidence interval bounds
   
   dates <- unique(flowerData[which(flowerData$Species.Name == species
                                    & flowerData$Transect == transect),]$Date)
   
   allIs <- adply(.data = dates,
                  .margins = 1,
-                 .fun = function(obsDate) data.frame(Date = c(obsDate),
-                                                     moransI = c(getOneMoransI(species, 
-                                                                               transect, 
-                                                                               obsDate, 
-                                                                               flowerData)$statistic)
-                                                     )
+                 .fun = function(obsDate) 
+                   {
+                   oneMoran <- getOneMoransI(species, 
+                                             transect, 
+                                             obsDate, 
+                                             flowerData);
+                   data.frame(Date = c(obsDate),
+                              moransI = oneMoran$statistic,
+                              variance = oneMoran$estimate[3],
+                              p.value = oneMoran$p.value)
+                 }
                  )
+  
+  # Find the distance between the mean and the upper and lower 95% confidence interval bounds
+  # using the t-test with 50 - 1 degrees of freedom
+  halfInterval <- qt(0.95, df = 50 - 1)/2 * (sqrt(allIs$variance) / sqrt(50))
+  
+  allIs$lowerCI <- allIs$moransI - halfInterval
+  allIs$upperCI <- allIs$moransI + halfInterval
   
   return(allIs)
 }
