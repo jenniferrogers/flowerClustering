@@ -64,8 +64,19 @@ allDatesMoransI <- function(species, transect, flowerData)
   #        flowerdata, the cleaned data (from cleanData())
   
   dates <- unique(flowerData[which(flowerData$Species.Name == species
-                                   & flowerData$Transect == transect)]$Date)
+                                   & flowerData$Transect == transect),]$Date)
   
+  allIs <- adply(.data = dates,
+                 .margins = 1,
+                 .fun = function(obsDate) data.frame(Date = c(obsDate),
+                                                     moransI = c(getOneMoransI(species, 
+                                                                               transect, 
+                                                                               obsDate, 
+                                                                               flowerData)$statistic)
+                                                     )
+                 )
+  
+  return(allIs)
 }
 
 getOneMoransI <- function(species, transect, date, flowerData)
