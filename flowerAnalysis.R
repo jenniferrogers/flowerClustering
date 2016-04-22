@@ -55,7 +55,18 @@ filterData <- function(flowerSpecies, transect, date, flowerData)
 }
 
 
-# Input: Species, transect, set of dates, returns Moran's I for each date (and error bars)
+allDatesMoransI <- function(species, transect, flowerData)
+{
+  # For a given species name and transect, report the Moran's I
+  # for every date that flowers were found.
+  # Input: species, a string
+  #        transect, a string
+  #        flowerdata, the cleaned data (from cleanData())
+  
+  dates <- unique(flowerData[which(flowerData$Species.Name == species
+                                   & flowerData$Transect == transect)]$Date)
+  
+}
 
 getOneMoransI <- function(species, transect, date, flowerData)
 {
@@ -82,7 +93,8 @@ getOneMoransI <- function(species, transect, date, flowerData)
 plotOne <- function(species, transect, date, flowerData)
 {
   # Given a flower species, a transect, a date, and the cleaned flower data,
-  # plot the number of flowers observed in each subsection
+  # plot the number of flowers observed in each subsection and return the
+  # plot as well
   
   # A spatial polygons data frame, including the subsection of the
   # transects, along with the number of flowers found in each subsection
@@ -98,84 +110,13 @@ plotOne <- function(species, transect, date, flowerData)
   return(spatialPlot)
 }
 
-############ SEASON PLOTS :) #############
-seasonData <- function(speciesName, transectName, season, file = file.choose())
-{
-  # this function will plot the species given in the transect given
-  # during the four seasons (dates explained in paper)
-  seasons <- seasonDates(transectName) # get the dates for the seasons
-  # Spring Spatial Data Frame
-  springDate <- seasons[1]
-  summerDate <- seasons[2]
-  fallDate <- seasons[3]
-  winterDate <- seasons[4]
-  
-  cleanedData <- cleanData(file)
-  
-  if (season == "spring"){
-    return(filterData(flowerSpecies=speciesName,transect=transectName,
-                          date=springDate, cleanedData))
-  } else if (season == "summer"){
-    return(filterData(flowerSpecies=speciesName,transect=transectName,
-                          date=summerDate, cleanedData))
-  } else if (season == "fall"){
-    if (transectName == "USS a" | transectName == "USS b"){
-      print("This transect does not have fall data")
-      return
-    }
-    else { 
-      return(filterData(flowerSpecies=speciesName,transect=transectName,
-                        date=fallDate, cleanedData))
-    }
-  }
-  else if (season == "winter"){
-    if (transectName == "USS a" | transectName == "USS b"){
-      print("This transect does not have winter data")
-      return()
-    }
-    else {
-      return(filterData(flowerSpecies=speciesName,transect=transectName,
-                        date=winterDate, cleanedData))
-    }
-  }
-}
 
-# Put all of the scripts in a function, so we can source this file
-# without it running code. :)
-runScripts <- function()
+plotFour <- function(plot1, plot2, plot3, plot4)
 {
-  # We can run the above for instance with the following code:
-  #springData <- seasonData(speciesName="erodium cicutarium",transectName="BRS a",season="spring")
-  #spplot(springData["value.flowerNum"])
-  # We can plot all seasons for one species as follows:
-  springData <- seasonData(speciesName="erodium cicutarium",transectName="BRS a",season="spring")
-  summerData <- seasonData(speciesName="erodium cicutarium",transectName="BRS a",season="summer")
-  fallData <- seasonData(speciesName="erodium cicutarium",transectName="BRS a",season="fall")
-  winterData <- seasonData(speciesName="erodium cicutarium",transectName="BRS a",season="winter")
-  p1 = spplot(springData["value.flowerNum"])
-  p2 = spplot(summerData["value.flowerNum"])
-  p3 = spplot(fallData["value.flowerNum"])
-  p4 = spplot(winterData["value.flowerNum"])
-  # Make a composite plot:
-  print(p1, position = c(0,.5,.5,1),more=T)
-  print(p2, position = c(.5,.5,1,1),more = T)
-  print(p3, position = c(0,0,.5,.5),more=T)
-  print(p4, position = c(.5,0,1,.5))
-  # get four plots with spring summer winter and fall plotted
-  # help from : https://stat.ethz.ch/pipermail/r-sig-geo/2008-August/004026.html
-  
-  
-  springData <- seasonData(speciesName="eriogonum fasciculatum",transectName="NNG b",season="spring")
-  summerData <- seasonData(speciesName="eriogonum fasciculatum",transectName="NNG b",season="summer")
-  fallData <- seasonData(speciesName="eriogonum fasciculatum",transectName="NNG b",season="fall")
-  winterData <- seasonData(speciesName="eriogonum fasciculatum",transectName="NNG b",season="winter")
-  p1 = spplot(springData["value.flowerNum"])
-  p2 = spplot(summerData["value.flowerNum"])
-  p3 = spplot(fallData["value.flowerNum"])
-  p4 = spplot(winterData["value.flowerNum"])
-  # Make a composite plot:
-  print(p1, position = c(0,.5,.5,1),more=T)
-  print(p2, position = c(.5,.5,1,1),more = T)
-  print(p3, position = c(0,0,.5,.5),more=T)
-  print(p4, position = c(.5,0,1,.5))
+  # The plots are objects that have been made with spplot
+  # (i.e., the output of plotOne)
+  print(plot1, position = c(0,.5,.5,1),more=T)
+  print(plot2, position = c(.5,.5,1,1),more = T)
+  print(plot3, position = c(0,0,.5,.5),more=T)
+  print(plot4, position = c(.5,0,1,.5))
 }
