@@ -79,6 +79,25 @@ getOneMoransI <- function(species, transect, date, flowerData)
   return(moran_result)
 }
 
+plotOne <- function(species, transect, date, flowerData)
+{
+  # Given a flower species, a transect, a date, and the cleaned flower data,
+  # plot the number of flowers observed in each subsection
+  
+  # A spatial polygons data frame, including the subsection of the
+  # transects, along with the number of flowers found in each subsection
+  spatialData <- filterData(flowerSpecies = species,
+                            transect = transect,
+                            date = date, 
+                            flowerData)
+  
+  spatialPlot <- spplot(spatialData["value.flowerNum"])
+  
+  print(spatialPlot)
+  
+  return(spatialPlot)
+}
+
 ############ SEASON PLOTS :) #############
 seasonData <- function(speciesName, transectName, season, file = file.choose())
 {
