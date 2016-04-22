@@ -3,6 +3,8 @@ library(sp)
 library(spdep) # For the spatial weights matrix
 library(ggplot2)
 library(ggthemes)
+library(gridExtra)
+library(EcoGenetics)
 
 ##### Data Cleaning #####
 # Primary function: cleanData(file.choose())
@@ -100,7 +102,7 @@ allDatesMoransI <- function(species, transect, flowerData)
                                              obsDate, 
                                              flowerData);
                    data.frame(Date = c(obsDate),
-                              moransI = oneMoran$statistic,
+                              moransI = oneMoran$estimate[1],
                               variance = oneMoran$estimate[3],
                               p.value = oneMoran$p.value)
                  }
@@ -108,7 +110,7 @@ allDatesMoransI <- function(species, transect, flowerData)
   
   # Find the distance between the mean and the upper and lower 95% confidence interval bounds
   # using the t-test with 50 - 1 degrees of freedom
-  halfInterval <- qt(0.95, df = 50 - 1)/2 * (sqrt(allIs$variance) / sqrt(50))
+  halfInterval <- qt(0.975, df = 50 - 1) * (sqrt(allIs$variance) / sqrt(50))
   
   allIs$lowerCI <- allIs$moransI - halfInterval
   allIs$upperCI <- allIs$moransI + halfInterval
