@@ -151,20 +151,30 @@ plotOne <- function(species, transect, date, flowerData)
                             date = date, 
                             flowerData)
   
-  spatialPlot <- spplot(spatialData["value.flowerNum"])
+  spatialPlot <- spplot(spatialData["value.flowerNum"], main=list(label=date))
   
   print(spatialPlot)
   
   return(spatialPlot)
 }
 
-
-plotFour <- function(plot1, plot2, plot3, plot4)
+plotFour <- function(plot1, plot2, plot3, plot4,title)
 {
-  # The plots are objects that have been made with spplot
-  # (i.e., the output of plotOne)
-  print(plot1, position = c(0,.5,.5,1),more=T)
-  print(plot2, position = c(.5,.5,1,1),more = T)
-  print(plot3, position = c(0,0,.5,.5),more=T)
-  print(plot4, position = c(.5,0,1,.5))
+  # GGplot help:
+  # http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/#working-with-multi-panel-plots
+  grid.arrange(plot1, plot2, plot3,plot4, ncol=2,nrow=2,top=title)
+}
+
+fourPlots <- function(species,transect,date1,date2,date3,date4,flowerData)
+{
+  # one plot containg 4 distributions on the given days for the given species
+  # in the given transect
+  plot1 = plotOne(species, transect, date1, flowerData)
+  plot2 = plotOne(species, transect, date2, flowerData)
+  plot3 = plotOne(species, transect, date3, flowerData)
+  plot4 = plotOne(species, transect, date4, flowerData)
+  # make the title!
+  title <- paste("The Distribution of",species,"in",transect,sep=" ")
+  #Plot it!
+  plotFour(plot1, plot2, plot3, plot4,title)
 }
